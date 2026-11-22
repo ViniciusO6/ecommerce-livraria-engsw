@@ -26,11 +26,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Scanner;
 
-/**
- * Simulador interativo em console para execucao manual (abordagem caixa-preta)
- * do caso de uso CSU02 - Efetuar Pedido, permitindo informar entradas ao vivo
- * para evidenciar em video todos os cenarios (RN01 a RN05, GFC C1..C7 e GE S1..S3).
- */
 public class SistemaLivrariaConsole {
 
     private static final Scanner sc = new Scanner(System.in);
@@ -61,7 +56,6 @@ public class SistemaLivrariaConsole {
     private static void executarFluxoPedido(EfetuarPedidoService service) {
         Carrinho carrinho = new Carrinho();
 
-        // 1. Montagem do Carrinho (RN01 e RN02)
         System.out.print("Deseja adicionar algum livro ao carrinho? (s/n): ");
         while (lerSimNao()) {
             System.out.print("Titulo do livro: ");
@@ -105,7 +99,6 @@ public class SistemaLivrariaConsole {
             System.out.print("Deseja adicionar outro livro ao carrinho? (s/n): ");
         }
 
-        // 2. Confirmar carrinho (Passo 1 e 2 do Fluxo Principal)
         System.out.println("\n[Sistema] Validando carrinho para prosseguir com o pedido...");
         try {
             service.visualizarCarrinho(carrinho);
@@ -124,7 +117,6 @@ public class SistemaLivrariaConsole {
                     item.getSubTotal());
         }
 
-        // 3. Cadastro do Cliente e Endereco (Passo 3 / Fluxo Alternativo CSU03)
         System.out.print("\nCliente ja possui cadastro? (s/n): ");
         Cliente cliente;
         Endereco endereco;
@@ -156,7 +148,6 @@ public class SistemaLivrariaConsole {
             System.out.println("-> Cadastro salvo e cliente autenticado. Retornando ao pedido...");
         }
 
-        // 4. Calculo de Frete (Passo 4)
         System.out.print("\nInforme o valor do frete retornado pelo Sistema de Frete (R$): ");
         double valorFreteInformado = lerDoubleMinimo(0.0);
         CalculadoraFrete apiFrete = cep -> valorFreteInformado;
@@ -165,7 +156,6 @@ public class SistemaLivrariaConsole {
         double totalBruto = carrinho.getTotal() + frete;
         System.out.printf("-> Frete calculado: R$ %.2f | Total bruto do pedido: R$ %.2f%n", frete, totalBruto);
 
-        // 5. Forma de Pagamento (Passo 5 e RN04)
         Descontavel formaPagamento = null;
         while (formaPagamento == null) {
             System.out.print("\nEscolha a forma de pagamento [1-Pix (8% desc) | 2-Cartao de Credito]: ");
@@ -196,7 +186,6 @@ public class SistemaLivrariaConsole {
             }
         }
 
-        // 6. Autorizacao / Processamento (Passo 6 e RN05)
         System.out.print("\nCanal de notificacao ao funcionario (RN03) [1-Email | 2-SMS]: ");
         int opNotif = lerInteiroIntervalo(1, 2);
         Notificavel notificavel = (opNotif == 2)
@@ -222,7 +211,6 @@ public class SistemaLivrariaConsole {
                     l.getTitulo(), l.getEstoque().getQuantidade(), l.getEstoque().isEstoqueMin());
         }
 
-        // 7. Evolucao de Estados pos-confirmacao (GE S1 / S3)
         if (pedido.getStatus() == StatusPedido.confirmado) {
             System.out.println("\nDeseja simular transicao posterior do pedido (Maquina de Estados)?");
             System.out.print("[1-Avancar ate finalizado (S1) | 2-Cancelar pedido confirmado (S3) | 0-Encerrar]: ");

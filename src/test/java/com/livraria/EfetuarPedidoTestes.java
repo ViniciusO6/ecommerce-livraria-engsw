@@ -25,11 +25,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Executor de testes funcionais (abordagem caixa-preta) para o caso de uso
- * CSU02 - Efetuar Pedido, cobrindo os caminhos C1..C7 do GFC, as sequências
- * S1..S3 do GE e as regras de negócio RN01..RN05.
- */
 public class EfetuarPedidoTestes {
 
     private static int totalExecutados = 0;
@@ -121,17 +116,16 @@ public class EfetuarPedidoTestes {
         Estoque estoque = new Estoque(10);
         Livro livro = new CapaDura("Engenharia de Software", "978-0001", 100.00, StatusLivro.disponivel, estoque);
         Carrinho carrinho = new Carrinho();
-        carrinho.adicionarItem(livro, 2); // 2 * 100.00 = 200.00 (RN02 CapaDura 0% desc.)
+        carrinho.adicionarItem(livro, 2);
 
-        CalculadoraFrete freteApi = cep -> 20.00; // Total bruto = 220.00
+        CalculadoraFrete freteApi = cep -> 20.00;
         PagamentoRegistrador pagtoApi = new PagamentoRegistrador(true);
         NotificacaoEspiao notif = new NotificacaoEspiao(new Email("estoque@livraria.com", "Alerta Estoque"));
-        Descontavel pix = new Pix("chave-pix-cliente"); // 8% desc. -> 220.00 * 0.92 = 202.40 (RN04)
+        Descontavel pix = new Pix("chave-pix-cliente");
 
         Pedido pedido = service.confirmarPedido(pix, end, carrinho, cliente, freteApi, pagtoApi, notif);
         boolean statusConfirmado = pedido.getStatus() == StatusPedido.confirmado;
 
-        // Evolucao GE S1: T6 (emTransporte) -> T7 (finalizado)
         pedido.setStatus(StatusPedido.emTransporte);
         boolean emTransporte = pedido.getStatus() == StatusPedido.emTransporte;
         pedido.setStatus(StatusPedido.finalizado);
@@ -151,20 +145,19 @@ public class EfetuarPedidoTestes {
 
     private static void executarCT03_SemCadastroBrochuraPix_GFC_C3() {
         EfetuarPedidoService service = new EfetuarPedidoService();
-        // Fluxo alternativo passo 3: cliente realiza cadastro e cadastra endereco antes de prosseguir
         Cliente novoCliente = new Cliente("Jonatas Palmeira", "222.333.444-55", "jonatas@fatec.sp.gov.br", "11988887777", new Date());
         Endereco end = new Endereco("01001-000", "Praca da Se", 100);
         novoCliente.getEnderecos().add(end);
 
         Estoque estoque = new Estoque(6);
-        Livro livro = new Brochura("Clean Code", "978-0002", 100.00, StatusLivro.disponivel, estoque); // 5% desc = 95.00
+        Livro livro = new Brochura("Clean Code", "978-0002", 100.00, StatusLivro.disponivel, estoque);
         Carrinho carrinho = new Carrinho();
         carrinho.adicionarItem(livro, 1);
 
-        CalculadoraFrete freteApi = cep -> 15.00; // Bruto = 95 + 15 = 110.00
+        CalculadoraFrete freteApi = cep -> 15.00;
         PagamentoRegistrador pagtoApi = new PagamentoRegistrador(true);
         Notificavel notif = new Email("estoque@livraria.com", "Alerta Estoque");
-        Descontavel pix = new Pix("jonatas@pix.br"); // 8% desc -> 110 * 0.92 = 101.20
+        Descontavel pix = new Pix("jonatas@pix.br");
 
         Pedido pedido = service.confirmarPedido(pix, end, carrinho, novoCliente, freteApi, pagtoApi, notif);
         boolean ok = pedido.getStatus() == StatusPedido.confirmado
@@ -184,14 +177,14 @@ public class EfetuarPedidoTestes {
         cliente.getEnderecos().add(end);
 
         Estoque estoque = new Estoque(10);
-        Livro livro = new Digital("Padroes de Projeto", "978-0003", 100.00, StatusLivro.disponivel, estoque); // 10% desc = 90.00
+        Livro livro = new Digital("Padroes de Projeto", "978-0003", 100.00, StatusLivro.disponivel, estoque);
         Carrinho carrinho = new Carrinho();
         carrinho.adicionarItem(livro, 1);
 
-        CalculadoraFrete freteApi = cep -> 0.00; // Bruto = 90.00
+        CalculadoraFrete freteApi = cep -> 0.00;
         PagamentoRegistrador pagtoApi = new PagamentoRegistrador(true);
         Notificavel notif = new SMS("11999998888");
-        Descontavel cartao1x = new Cartao("4111-2222-3333-4444", 1); // 3% desc -> 90 * 0.97 = 87.30
+        Descontavel cartao1x = new Cartao("4111-2222-3333-4444", 1);
 
         Pedido pedido = service.confirmarPedido(cartao1x, end, carrinho, cliente, freteApi, pagtoApi, notif);
         boolean ok = pedido.getStatus() == StatusPedido.confirmado
@@ -214,10 +207,10 @@ public class EfetuarPedidoTestes {
         Carrinho carrinho = new Carrinho();
         carrinho.adicionarItem(livro, 1);
 
-        CalculadoraFrete freteApi = cep -> 30.00; // Bruto = 150.00
+        CalculadoraFrete freteApi = cep -> 30.00;
         PagamentoRegistrador pagtoApi = new PagamentoRegistrador(true);
         Notificavel notif = new Email("estoque@livraria.com", "Alerta");
-        Descontavel cartao3x = new Cartao("5555-6666-7777-8888", 3); // sem juros, sem desconto = 150.00
+        Descontavel cartao3x = new Cartao("5555-6666-7777-8888", 3);
 
         Pedido pedido = service.confirmarPedido(cartao3x, end, carrinho, cliente, freteApi, pagtoApi, notif);
 
@@ -270,7 +263,7 @@ public class EfetuarPedidoTestes {
         Endereco end = new Endereco("05000-000", "Rua Cerro Cora", 80);
         cliente.getEnderecos().add(end);
 
-        Estoque estoque = new Estoque(3); // Comprando 1 -> cai para 2 (<= estoqueMin) -> RN03
+        Estoque estoque = new Estoque(3);
         Livro livro = new CapaDura("Testes Automatizados", "978-0006", 80.00, StatusLivro.disponivel, estoque);
         Carrinho carrinho = new Carrinho();
         carrinho.adicionarItem(livro, 1);
