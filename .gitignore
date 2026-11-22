@@ -1,0 +1,23 @@
+# Compiled Java artifacts
+out/
+target/
+bin/
+*.class
+*.jar
+
+# IDE / Editor
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# Visual Paradigm backups / lock files
+*.vpp.bak*
+*.vpp.vbak
+.*.vpp.lck
+
+# OS
+.DS_Store
+Thumbs.db
